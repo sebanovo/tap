@@ -1,0 +1,15 @@
+FROM node:22-slim
+
+# Copiar proyecto
+COPY ./frontend /app
+
+WORKDIR /app
+
+# Instalar dependencias
+RUN npm install
+
+# Exponer el puerto en el que React/Vite corre (por defecto 5173)
+EXPOSE 5173
+
+# Comando para iniciar el servidor de desarrollo de Vite con hot reload
+CMD ["npm", "run", "dev"]

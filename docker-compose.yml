@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1']
+
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - mi-red
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    env_file: ./backend/.env
+    # volumes:
+      # - ./backend:/app # Para sincronizar los archivos locales con los del contenedor
+    ports:
+      - '3000:3000'
+    networks:
+      - mi-red # Conectar a la misma red para que se puedan comunicar
+    environment:
+      - HOST=0.0.0.0 # Necesario para que Vite escuche fuera del contenedor
+      - CHOKIDAR_USEPOLLING=true # Activa el hot reload de React
+    depends_on:
+      db:
+        condition: service_healthy # Espera a que la db este OK
+
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./frontend/Dockerfile
+  #   env_file: ./frontend/.env
+  #   depends_on:
+  #     - backend
+  #   working_dir: /app
+  #   volumes:
+  #     # - ./frontend:/app # Para sincronizar los archivos locales con los del contenedor
+  #     - node-modules:/app/node_modules
+  #   ports:
+  #     - '5173:5173'
+  #   environment:
+  #     - HOST=0.0.0.0 # Necesario para que Vite escuche fuera del contenedor
+  #     - CHOKIDAR_USEPOLLING=true # Activa el hot reload de React
+  #   networks:
+  #     - mi-red
+
+volumes:
+  postgres-data:
+  # node-modules:
+
+networks:
+  mi-red:
+    driver: bridge
