@@ -1,4 +1,4 @@
-FROM node:22-slim
+FROM node:20-slim
 
 # Instalar dependencias necesarias
 RUN apt-get update
