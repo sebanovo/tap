@@ -26,6 +26,10 @@ export default defineConfig([
   },
   {
     rules: {
+      'no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_+$', varsIgnorePattern: '^_+$', caughtErrorsIgnorePattern: '^_+$' },
+      ],
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },

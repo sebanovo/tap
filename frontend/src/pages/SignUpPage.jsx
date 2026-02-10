@@ -1,10 +1,9 @@
 import Env from '../constants/env';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { server } from '../utils/server';
 
 function SignUpPage() {
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,22 +16,36 @@ function SignUpPage() {
     setError('');
 
     try {
-      await server().signUp({
-        username,
-        email,
-        password,
+      const API_URL = `http://${Env.VITE_SERVER_HOST}:3000`;
+
+      const response = await fetch(`${API_URL}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        throw new Error(data.error || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      localStorage.setItem('token', data.token);
+
+      const verifyResponse = await fetch(`${API_URL}/auth/verify`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const sessionResponse = await server().validateSession();
-
-      if (sessionResponse.valid) {
+      if (verifyResponse.ok) {
         navigate('/panel-admin');
       } else {
-        setError('Error al establecer la sesión');
+        throw new Error('Token inválido');
       }
-    } catch (error) {
-      console.error('Error en registro:', error);
+    } catch (_) {
       setError('Error al Registrarse. Intenta nuevamente.');
     } finally {
       setLoading(false);
@@ -74,8 +87,8 @@ function SignUpPage() {
                 Nombre de usuario
               </label>
               <input
-                onChange={(e) => setUsername(e.target.value)}
-                value={username}
+                onChange={(e) => setName(e.target.value)}
+                value={name}
                 id='username'
                 name='username'
                 type='text'
