@@ -1,52 +1,26 @@
+import './index.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { LandingPage, CreateTenant } from './pages';
-import { NotFoundPage } from './pages/fallback';
-import {
-  LandingPageTenant,
-  LoginPageTenant,
-  SignUpPageTenant,
-  PanelAdminPageTenant,
-} from './tenant/pages';
-import { TenantGuard } from './guards';
-import { validateHost, getSubdomain } from './utils/hosts';
-import { ProtectedRouteTenant } from './tenant/secure';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import PanelAdminPage from './pages/PanelAdminPage';
+import SignUpPage from './pages/SignUpPage';
+import ProtectedRoute from './secure/ProtectedRoute';
 
 function App() {
-  const isHost = validateHost(window.location.hostname);
-  if (!isHost) return <NotFoundPage />;
-
-  const subdomain = getSubdomain(window.location.hostname);
-  const isTenant = !!subdomain;
-
-  if (isTenant) {
-    return (
-      <BrowserRouter>
-        <TenantGuard>
-          <Routes>
-            <Route path='/' element={<LandingPageTenant />} />
-            <Route path='/login' element={<LoginPageTenant />} />
-            <Route path='/signup' element={<SignUpPageTenant />} />
-            <Route
-              path='/panel-admin'
-              element={
-                <ProtectedRouteTenant>
-                  <PanelAdminPageTenant />
-                </ProtectedRouteTenant>
-              }
-            />
-            <Route path='*' element={<NotFoundPage />} />
-          </Routes>
-        </TenantGuard>
-      </BrowserRouter>
-    );
-  }
-
   return (
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<LandingPage />} />
-        <Route path='/create-tenant' element={<CreateTenant />} />
-        <Route path='*' element={<NotFoundPage />} />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/signup' element={<SignUpPage />} />
+        <Route
+          path='/panel-admin'
+          element={
+            <ProtectedRoute>
+              <PanelAdminPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

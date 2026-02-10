@@ -9,11 +9,14 @@ services:
     environment:
       - HOST=0.0.0.0 # Necesario para que Vite escuche fuera del contenedor
       - CHOKIDAR_USEPOLLING=true # Activa el hot reload de React
+    expose:
+      - 3000
+      - 5173
     ports:
-      - '5173:5173'
       - '3000:3000'
+      - '5173:5173'
     networks:
-      - mi-red # Conectar a la misma red para que se puedan comunicar
+      - mi-red
     depends_on:
       - db
 
@@ -29,7 +32,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
-      - mi-red # Conectar a la misma red para que se puedan comunicar
+      - mi-red
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1']
 

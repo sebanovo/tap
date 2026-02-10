@@ -14,9 +14,9 @@ export default defineConfig({
     allowedHosts: ['.nip.io', '.sslip.io'],
   },
 });
-// http://aleman.18.188.44.65.nip.io:5173/ mi servidor
 
 /*
-DNS comodin 
-Configurar DNS wildcard.
+Usar DNS comodin 
+Configurar DNS wildcard ya sea .nip.io o
+.sslip.io o comprar un dominio propio
 */

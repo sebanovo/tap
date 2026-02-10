@@ -9,7 +9,7 @@ const Column = ({ column }) => {
   );
 };
 
-const DataTableTenant = ({
+const DataTable = ({
   columns,
   data,
   onEdit,
@@ -83,4 +83,4 @@ const DataTableTenant = ({
   );
 };
 
-export default DataTableTenant;
+export default DataTable;

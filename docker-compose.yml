@@ -8,12 +8,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - 5432
     ports:
       - '5432:5432'
 
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1']
-
       interval: 5s
       timeout: 3s
       retries: 20
@@ -25,41 +26,47 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     env_file: ./backend/.env
-    # volumes:
+    volumes:
       # - ./backend:/app # Para sincronizar los archivos locales con los del contenedor
+      - node-modules-backend:/app/node_modules
+    expose:
+      - 3000
     ports:
       - '3000:3000'
     networks:
-      - mi-red # Conectar a la misma red para que se puedan comunicar
+      - mi-red 
     environment:
-      - HOST=0.0.0.0 # Necesario para que Vite escuche fuera del contenedor
-      - CHOKIDAR_USEPOLLING=true # Activa el hot reload de React
+      - HOST=0.0.0.0 # Necesario para escuchar fuera del contenedor
+      - CHOKIDAR_USEPOLLING=true # Necesario para el HotReload 
     depends_on:
       db:
         condition: service_healthy # Espera a que la db este OK
 
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: ./frontend/Dockerfile
-  #   env_file: ./frontend/.env
-  #   depends_on:
-  #     - backend
-  #   working_dir: /app
-  #   volumes:
-  #     # - ./frontend:/app # Para sincronizar los archivos locales con los del contenedor
-  #     - node-modules:/app/node_modules
-  #   ports:
-  #     - '5173:5173'
-  #   environment:
-  #     - HOST=0.0.0.0 # Necesario para que Vite escuche fuera del contenedor
-  #     - CHOKIDAR_USEPOLLING=true # Activa el hot reload de React
-  #   networks:
-  #     - mi-red
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    env_file: ./frontend/.env
+    depends_on:
+      - backend
+    working_dir: /app
+    volumes:
+      # - ./frontend:/app # Para sincronizar los archivos locales con los del contenedor
+      - node-modules-frontend:/app/node_modules
+    expose:
+      - 5173
+    ports:
+      - '5173:5173'
+    environment:
+      - HOST=0.0.0.0 # Necesario para escuchar fuera del contenedor 
+      - CHOKIDAR_USEPOLLING=true # Necesario para el HotReload de React
+    networks:
+      - mi-red
 
 volumes:
   postgres-data:
-  # node-modules:
+  node-modules-backend:
+  node-modules-frontend:
 
 networks:
   mi-red:

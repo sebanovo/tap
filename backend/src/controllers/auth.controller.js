@@ -44,3 +44,34 @@ export const login = async (req, res) => {
     res.status(500).json({ error: 'Error en login', details: err.message });
   }
 };
+
+export const verify = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      success: true,
+      user,
+      message: 'Token válido',
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: 'Error al verificar token',
+      details: err.message,
+    });
+  }
+};

@@ -6,9 +6,3 @@ RUN apt-get update && apt-get install -y \
   git 
 
 WORKDIR /workspaces
-
-# # Exponer puerto (Backend)
-# EXPOSE 3000
-
-# # Exponer el puerto (Frontend)
-# EXPOSE 5173

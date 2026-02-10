@@ -10,10 +10,12 @@
     "lint": "eslint . --ext .{js,mjs} --fix --ignore-pattern src/generated",
     "format": "prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull",
+    "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
-    "prisma:seed": "node prisma/seeders/seed.js"
+    "prisma:seed": "node prisma/seeders/seed.js",
+    "prisma:reset": "prisma migrate reset -f",
+    "prisma:init": "npm run prisma:reset && npm run prisma:generate && npm run prisma:migrate && npm run prisma:seed && npm run prisma:seed"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,221 @@
+import Env from '../constants/env';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+
+function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const API_URL = `http://${Env.VITE_SERVER_HOST}:3000`;
+
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      if (!data.token) {
+        throw new Error('El servidor no devolvió un token de autenticación');
+      }
+
+      localStorage.setItem('token', data.token);
+
+      const verifyResponse = await fetch(`${API_URL}/auth/verify`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+
+      if (verifyResponse.ok) {
+        navigate('/panel-admin');
+      } else {
+        throw new Error('Token inválido');
+      }
+    } catch (error) {
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setError(`No se pudo conectar al servidor: ${Env.VITE_SERVER_HOST}:3000`);
+      } else if (error.message.includes('401') || error.message.includes('Credenciales')) {
+        setError('Email o contraseña incorrectos');
+      } else if (error.message.includes('404')) {
+        setError('Ruta no encontrada. Verifica la URL del servidor.');
+      } else if (error.message.includes('500')) {
+        setError('Error interno del servidor');
+      } else {
+        setError(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <div className='flex min-h-screen items-center justify-center bg-gradient-to-br from-amber-50 to-green-50 px-4 py-12 sm:px-6 lg:px-8'>
+      <div className='w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-lg'>
+        <div className='text-center'>
+          <img className='mx-auto h-12 w-auto' src='/images/logo.png' alt={Env.VITE_SYSTEM_NAME} />
+          <h2 className='mt-6 text-3xl font-extrabold text-green-800'>Iniciar sesión</h2>
+          <p className='mt-2 text-sm text-gray-600'>Accede a tu cuenta de {Env.VITE_SYSTEM_NAME}</p>
+        </div>
+
+        {error && (
+          <div className='rounded-md bg-red-50 p-4'>
+            <div className='flex'>
+              <div className='flex-shrink-0'>
+                <svg className='h-5 w-5 text-red-400' viewBox='0 0 20 20' fill='currentColor'>
+                  <path
+                    fillRule='evenodd'
+                    d='M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </div>
+              <div className='ml-3'>
+                <h3 className='text-sm font-medium text-red-800'>{error}</h3>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
+          <div className='space-y-4'>
+            <div>
+              <label htmlFor='email-address' className='block text-sm font-medium text-gray-700'>
+                Correo electrónico
+              </label>
+              <input
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+                id='email-address'
+                name='email'
+                type='email'
+                autoComplete='email'
+                required
+                className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500 focus:outline-none sm:text-sm'
+                placeholder='correo@ejemplo.com'
+              />
+            </div>
+            <div>
+              <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
+                Contraseña
+              </label>
+              <input
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                id='password'
+                name='password'
+                type='password'
+                autoComplete='current-password'
+                required
+                className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500 focus:outline-none sm:text-sm'
+                placeholder='Tu contraseña'
+              />
+            </div>
+          </div>
+
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center'>
+              <input
+                id='remember-me'
+                name='remember-me'
+                type='checkbox'
+                className='h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500'
+              />
+              <label htmlFor='remember-me' className='ml-2 block text-sm text-gray-900'>
+                Recordar sesión
+              </label>
+            </div>
+
+            <div className='text-sm'>
+              <a href='#' className='font-medium text-green-600 hover:text-green-500'>
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type='submit'
+              disabled={loading}
+              className={`group relative flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none ${
+                loading ? 'cursor-not-allowed bg-gray-400' : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              {loading ? (
+                <div className='flex items-center'>
+                  <svg
+                    className='mr-3 -ml-1 h-5 w-5 animate-spin text-white'
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                  >
+                    <circle
+                      className='opacity-25'
+                      cx='12'
+                      cy='12'
+                      r='10'
+                      stroke='currentColor'
+                      strokeWidth='4'
+                    ></circle>
+                    <path
+                      className='opacity-75'
+                      fill='currentColor'
+                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                    ></path>
+                  </svg>
+                  Iniciando sesión...
+                </div>
+              ) : (
+                'Iniciar sesión'
+              )}
+            </button>
+          </div>
+
+          <div className='text-center'>
+            <p className='text-sm text-gray-600'>
+              ¿No tienes una cuenta?{' '}
+              <Link to='/signup' className='font-medium text-green-600 hover:text-green-500'>
+                Regístrate aquí
+              </Link>
+            </p>
+          </div>
+        </form>
+
+        <div className='text-center'>
+          <Link
+            to='/'
+            className='inline-flex items-center text-sm font-medium text-green-600 hover:text-green-500'
+          >
+            <svg className='mr-1 h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth='2'
+                d='M10 19l-7-7m0 0l7-7m-7 7h18'
+              />
+            </svg>
+            Volver al inicio
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default LoginPage;

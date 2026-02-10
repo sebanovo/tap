@@ -11,7 +11,7 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        // "bradlc.vscode-tailwindcss",
+        "bradlc.vscode-tailwindcss",
         "yoavbls.pretty-ts-errors",
         "prisma.prisma"
       ]
