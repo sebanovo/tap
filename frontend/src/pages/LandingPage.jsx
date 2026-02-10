@@ -1,7 +1,6 @@
 import Env from '../constants/env';
 import NavBar from '../components/NavBar';
 import FeatureCard from '../components/FeatureCard';
-import TestimonialCard from '../components/TestimonialCard';
 
 function LandingPage() {
   return (
