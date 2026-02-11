@@ -7,9 +7,9 @@
   "scripts": {
     "dev": "nodemon --ignore ./src/generated/ src/index.js",
     "start": "node src/index.js",
-    "lint": "eslint . --ext .{js,mjs} --fix --ignore-pattern src/generated",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:pull": "prisma db pull",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",

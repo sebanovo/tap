@@ -9,6 +9,7 @@ import eslintPluginPrettier from 'eslint-plugin-prettier';
 export default defineConfig([
   {
     files: ['**/*.{js,jsx}'],
+    ignores: ['dist/**'],
     extends: [
       js.configs.recommended,
       reactHooks.configs['recommended-latest'],
